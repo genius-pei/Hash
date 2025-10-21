@@ -19,7 +19,7 @@ void test01()
 	unordered_map<string, string> dict;
 	dict.insert({ "apple","Æ»¹û" });
 	dict.insert({ "orange","éÙ×Ó" });
-	dict.insert({ "banana","Ïã½¶" });
+	dict.insert({ "banana","Ïã½¶" }); 
 	for (auto& [k, v] : dict)
 	{
 		cout << k << ":" << v << endl;
