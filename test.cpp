@@ -3,6 +3,7 @@
 #include<unordered_set>
 #include<unordered_map>
 #include<set>
+#include"HashTable.h"
 using namespace std;
 
 void test01()
@@ -110,6 +111,7 @@ int test02()
 int main()
 {
 	//test01();
-	test02();
+	//test02();
+	testhash1();
 	return 0;
 }
