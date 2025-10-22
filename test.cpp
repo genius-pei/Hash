@@ -113,5 +113,6 @@ int main()
 	//test01();
 	//test02();
 	testhash1();
+	testhash2();
 	return 0;
 }
