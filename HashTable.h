@@ -52,7 +52,7 @@ public:
 			//_tables.swap(newtables);
 
 
-			HashTable<K, V> newHT;
+			HashTable<K, V,Hash> newHT;
 			newHT._tables.resize(_tables.size() * 2);  // 新表大小为原表2倍
 			//遍历旧表将其映射到新表
 			for (auto& data : _tables)
@@ -64,6 +64,7 @@ public:
 
 			}
 			_tables.swap(newHT._tables);
+			_n = newHT._n;  // 同步新表的有效元素数
 		}
 		Hash hs;
 		size_t hash0 = hs(kv.first) % _tables.size();
@@ -104,12 +105,14 @@ public:
 		{
 			ptr->_status = DELETE;
 			--_n;
+			return true;
 		}
 		else
 		{
 			return false;
 		}
 	}
+	
 private:
 	std::vector<HashData<K, V>> _tables;
 	size_t _n = 0;//有效数据的个数
@@ -137,7 +140,47 @@ void testhash1()
 		ht.Insert({ i, i });
 	}
 }
+struct StringHashFunc
+{
+	// BKDR
+	size_t operator()(const string& str)
+	{
+		size_t hash = 0;
+		for (auto ch : str)
+		{
+			hash += ch;
+			hash *= 131;
+		}
+
+		return hash;
+	}
+};template<>  // 模板特化标记
+struct HashFunc<string>  // 特化string类型
+{
+	size_t operator()(const string& str)  // 复用你的BKDR算法
+	{
+		size_t hash = 0;
+		for (auto ch : str)
+		{
+			hash += ch;
+			hash *= 131;
+		}
+		return hash;
+	}
+};
 void testhash2()
 {
-	 
+	HashTable<string, string, StringHashFunc> dict;
+	dict.Insert({ "insert", "插入" });
+
+	auto ptr = dict.Find("insert");
+	if (ptr)
+	{
+		cout << ptr->_kv.second << endl;
+	}
+
+	StringHashFunc hf;
+	cout << hf("abcd") << endl;
+	cout << hf("bcad") << endl;
+	cout << hf("aadd") << endl;
 }
