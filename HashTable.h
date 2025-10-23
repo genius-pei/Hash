@@ -208,10 +208,20 @@ namespace Hash_bucket
 	public:
 		bool Insert(const pair<K, V>& kv)
 		{
+			//À©ÈÝ
+			if (_n == _tables)
+			{
+
+			}
+
+
 			size_t hashi = kv.first % _tables.size();
+			//Í·²å
 			Node* newNode = new Node(kv);
 			newNode->_next = _tables[hashi];
 			_tables[hashi] = newNode;
+			++_n;
+			return true;
 		}
 	private:
 		vector<Node*> _tables;
