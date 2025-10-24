@@ -211,6 +211,16 @@ namespace Hash_bucket
 			//À©ÈÝ
 			if (_n == _tables)
 			{
+				HashTable<K, V> newHT;
+				newHT._tables.resize(_tables.size() * 2);
+				for (auto& data : _tables)
+				{
+					if (data._status == EXIST)
+					{
+						newHT.Insert(data._kv);
+					}
+				}
+				_tables.swap(newHT._tables);
 
 			}
 
