@@ -112,7 +112,8 @@ int main()
 {
 	//test01();
 	//test02();
-	testhash1();
-	testhash2();
+	//testhash1();
+	//testhash2();
+	Hash_bucket::testhash1();
 	return 0;
 }
