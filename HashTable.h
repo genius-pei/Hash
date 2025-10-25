@@ -200,27 +200,54 @@ namespace Hash_bucket
 	{
 		pair<K, V> _KV;
 		HashNode<K, V>* _next;
+		HashNode(const pair<K, V>& kv)
+			:_KV(kv)
+			, _next(nullptr)
+			{
+
+			}
+		
 	};
 	template<class K, class V>
 	class HashTable
 	{
 		typedef HashNode<K, V> Node;
 	public:
+		HashTable()
+			:_tables(11)
+			,_n(0)
+		{
+
+		}
 		bool Insert(const pair<K, V>& kv)
 		{
 			//扩容
-			if (_n == _tables)
+			if (_n == _tables.size())
 			{
-				HashTable<K, V> newHT;
-				newHT._tables.resize(_tables.size() * 2);
-				for (auto& data : _tables)
+				//HashTable<K, V> newHT;
+				//newHT._tables.resize(_tables.size() * 2);
+				//for (auto cur : _tables)
+				//{
+				//	newHT.Insert(cur->_kv);
+				//	cur = cur->_next; 
+				//}
+				//_tables.swap(newHT._tables);
+
+				vector<Node*> newtables(_tables.size() * 2);
+				for (size_t i = 0;i < _tables.size();i++)
 				{
-					if (data._status == EXIST)
+					Node* cur = _tables[i];
+					while (cur)
 					{
-						newHT.Insert(data._kv);
+						Node* next = cur->_next;
+						size_t hashi = cur->_KV.first % newtables.size();
+						cur->_next = newtables[hashi];
+						newtables[hashi] = cur;
+						cur = next;
 					}
-				}
-				_tables.swap(newHT._tables);
+					_tables[i] = nullptr;
+				 }
+				_tables.swap(newtables);
 
 			}
 
@@ -233,8 +260,66 @@ namespace Hash_bucket
 			++_n;
 			return true;
 		}
+		Node* Find(const K& key)
+		{
+			size_t hashi = key % _tables.size();
+			Node* cur = _tables[hashi];
+			whiel(cur)
+			{
+				if (cur->_kv.first == key)
+				{
+					return cur;
+				}
+				cur = cur->next;
+			}
+			return nullptr;
+		}
+		bool Erase(const K& key)
+		{
+			size_t hashi = key % _tables.size();
+			Node* prev=nullptr;
+			Node* cur = _tables[hashi];
+			while(cur)
+			{
+				if (cur->_kv.first == key)
+				{
+					if (prev == nullptr)//第一个节点
+					{
+						_tables[hashi] = cur->next;
+					}
+					else
+					{
+						prev->_next = cur->_next;
+					}
+					delete cur;
+					return true;
+				}
+				prev = cur;
+				cur = cur->next;
+			}
+		}
 	private:
 		vector<Node*> _tables;
 		size_t _n = 0;
 	};
+	void testhash1()
+	{
+		HashTable<int, int> ht;
+		int a[] = { 19,30,5,36,13,20,21,12,58 };
+		for (auto e : a)
+		{
+			ht.Insert({ e, e });
+		}
+
+		//cout << ht.Find(5) << endl;
+		//cout << ht.Find(58) << endl;
+		//ht.Erase(5);
+		//cout << ht.Find(5) << endl;
+		//cout << ht.Find(58) << endl;
+
+	//	for (size_t i = 100; i < 200; i++)
+	//	{
+	//		ht.Insert({ i, i });
+	//	}
+	}
 }
