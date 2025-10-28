@@ -105,15 +105,15 @@ int test02()
 	cout << "unordered_set erase:" << end6 - begin6 << endl << endl;
 
 	return 0;
-
 }
+    
 
 int main()
 {
 	//test01();
 	//test02();
-	//testhash1();
-	//testhash2();
+	//open_way::testhash1();
+
 	Hash_bucket::testhash1();
 	return 0;
 }
