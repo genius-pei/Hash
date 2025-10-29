@@ -10,10 +10,10 @@ enum Status
 	EMPTY,
 	DELETE
 };
-template<class K, class V>
+template<class K, class T>
 struct HashData
 {
-	pair<K, V> _kv;
+	pair<K, T> _kv;
 	Status _status=EMPTY;
 };
 template<class K>
@@ -41,7 +41,7 @@ struct HashFunc<string>  // 特化string类型
 
 namespace open_way
 {
-	template<class K, class V, class Hash = HashFunc<K>>
+	template<class K, class T, class Hash = HashFunc<K>>
 	class HashTable
 	{
 
@@ -52,7 +52,7 @@ namespace open_way
 		{
 
 		}
-		bool Insert(const pair<K, V>& kv)
+		bool Insert(const pair<K, T>& kv)
 		{
 			if ((double)_n / (double)_tables.size() >= 0.7)//扩容
 			{
@@ -69,7 +69,7 @@ namespace open_way
 				//_tables.swap(newtables);
 
 
-				HashTable<K, V, Hash> newHT;
+				HashTable<K, T, Hash> newHT;
 				newHT._tables.resize(_tables.size() * 2);  // 新表大小为原表2倍
 				//遍历旧表将其映射到新表
 				for (auto& data : _tables)
@@ -98,7 +98,7 @@ namespace open_way
 			++_n;
 			return true;
 		}
-		HashData<K, V>* Find(const K& key)
+		HashData<K, T>* Find(const K& key)
 		{
 			Hash hs;
 			size_t hash0 = hs(key) % _tables.size();
@@ -131,7 +131,7 @@ namespace open_way
 		}
 
 	private:
-		std::vector<HashData<K, V>> _tables;
+		std::vector<HashData<K, T>> _tables;
 		size_t _n = 0;//有效数据的个数
 
 
@@ -195,32 +195,123 @@ namespace open_way
 
 namespace Hash_bucket
 {
-	template<class K,class V>
+	template<class K,class T>
 	struct HashNode
 	{
-		pair<K, V> _KV;
-		HashNode<K, V>* _next;
-		HashNode(const pair<K, V>& kv)
-			:_KV(kv)
+		T _data;
+		HashNode<T>* _next;
+		HashNode(cont T& data)
+			:_data(data)
 			, _next(nullptr)
 			{
 
 			}
 		
 	};
-	template<class K, class V>
+
+
+	// 前置声明
+	template<class K, class T, class Hash = HashFunc<K>>
+	class HashTable;
+
+	template<class K, class T, class Ref, class Ptr, class KeyOfT, class Hash>
+	struct HTIterator
+	{
+		typedef HashNode<T> Node;
+		typedef HashTble<K, T, KeyofT, Hash> HT;
+		typedef HTIterator<K, T, Ref, Ptr, KeyOfT, Hash> Self;
+
+		Node* _node;
+		const HT* _ht;
+
+		HTIterator(Node* node, const HT* ht)
+			:_node(node)
+			,_ht(ht)
+		{
+
+		}
+
+		Ref operator*()
+		{
+			return _node->_data;
+		}
+		Ptr operator->()
+		{
+			return &_node->_data;
+		}
+		Self& operator++()
+		{
+			if (_node->_next)//当前还有节点
+			{
+				_node = _node->_next;
+			}
+			else//当前桶为空，找到下一个不为空的桶
+			{
+				size_t hashi = Hash()(KeyofT()(_node->_data)) % _ht._tables.size();
+				++hashi;
+				while (hashi != _ht._tables.size())
+				{
+					if (_ht._tables[hashi])
+					{
+						_node = _ht._tables[hashi];
+						break;
+					}
+					hashi++;
+				}
+			}
+			if (hashi == _ht._tables.size())//最后一个桶的最后一个节点已经遍历结束，走到end去，nullptr作为end()
+			{
+				_node = nullptr;
+			}
+		}
+		bool operator!=(const Self& s)const
+		{
+			return _node != s._node;
+		}
+
+
+	};
+
+	template<class K, class T, class Hash = HashFunc<K>>
 	class HashTable
 	{
-		typedef HashNode<K, V> Node;
+		typedef HashNode<K, T> Node;
 	public:
+		typedef HTIterator<K, T,T&,T*,KeyofT, Hash> Iterator;
+		Iterator Begin()
+		{
+
+		}
+		Itearator End()
+		{
+			return Iterator(nullptr, this);
+		}
+
 		HashTable()
 			:_tables(11)
 			,_n(0)
 		{
 
 		}
-		bool Insert(const pair<K, V>& kv)
+		~HashTable()
 		{
+			for (size_t i = 0; i < _tables.size(); i++)
+			{
+				Node* cur = _tables[i];
+				// 当前桶的节点重新映射挂到新表
+				while (cur)
+				{
+					Node* next = cur->_next;
+					delete cur;
+					cur = next;
+				}
+
+				_tables[i] = nullptr;
+			}
+		}
+		bool Insert(const pair<K, T>& kv)
+		{
+			Hash hs;
 			//扩容
 			if (_n == _tables.size())
 			{
@@ -240,7 +331,7 @@ namespace Hash_bucket
 					while (cur)
 					{
 						Node* next = cur->_next;
-						size_t hashi = cur->_KV.first % newtables.size();
+						size_t hashi = hs(cur->_data.first) % newtables.size();
 						cur->_next = newtables[hashi];
 						newtables[hashi] = cur;
 						cur = next;
@@ -252,7 +343,7 @@ namespace Hash_bucket
 			}
 
 
-			size_t hashi = kv.first % _tables.size();
+			size_t hashi = hs(kv.first) % _tables.size();
 			//头插
 			Node* newNode = new Node(kv);
 			newNode->_next = _tables[hashi];
@@ -262,11 +353,11 @@ namespace Hash_bucket
 		}
 		Node* Find(const K& key)
 		{
-			size_t hashi = key % _tables.size();
+			size_t hashi = hs(key) % _tables.size();
 			Node* cur = _tables[hashi];
-			whiel(cur)
+			while(cur)
 			{
-				if (cur->_kv.first == key)
+				if (cur->_data.first == key)
 				{
 					return cur;
 				}
@@ -276,7 +367,7 @@ namespace Hash_bucket
 		}
 		bool Erase(const K& key)
 		{
-			size_t hashi = key % _tables.size();
+			size_t hashi = hs(key) % _tables.size();
 			Node* prev=nullptr;
 			Node* cur = _tables[hashi];
 			while(cur)
