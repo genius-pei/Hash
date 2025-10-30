@@ -114,6 +114,6 @@ int main()
 	//test02();
 	//open_way::testhash1();
 
-	Hash_bucket::testhash1();
+	//Hash_bucket::testhash1();
 	return 0;
 }
