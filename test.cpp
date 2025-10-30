@@ -106,6 +106,10 @@ int test02()
 
 	return 0;
 }
+
+
+#include"Unorderedset.h"
+#include"Unorderedmap.h"
     
 
 int main()
@@ -115,5 +119,8 @@ int main()
 	//open_way::testhash1();
 
 	//Hash_bucket::testhash1();
+
+
+
 	return 0;
 }
