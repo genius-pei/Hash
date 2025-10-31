@@ -3,7 +3,7 @@
 #include<unordered_set>
 #include<unordered_map>
 #include<set>
-#include"HashTable.h"
+
 using namespace std;
 
 void test01()
@@ -120,7 +120,7 @@ int main()
 
 	//Hash_bucket::testhash1();
 
-
+	yiming::test_uset1();
 
 	return 0;
 }
