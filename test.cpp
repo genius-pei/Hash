@@ -120,7 +120,9 @@ int main()
 
 	//Hash_bucket::testhash1();
 
-	yiming::test_uset1();
+	//yiming::test_uset1();
+	//yiming::test_umap();
+	//yiming::test_uset2();
 
 	return 0;
 }
