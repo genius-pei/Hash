@@ -2,7 +2,7 @@
 
 #include"HashTablecopy.h"
 
-namespace bit
+namespace yiming
 {
 	template<class K, class V, class Hash = HashFunc<K>>
 	class unordered_map
@@ -62,6 +62,7 @@ namespace bit
 	private:
 		HashTable<K, pair<const K, V>, MapKeyOfT, Hash> _t;
 	};
+
 
 	void test_umap()
 	{
